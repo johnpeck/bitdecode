@@ -131,13 +131,17 @@ ${log}::info "Info message"
 ${log}::warn "Warn message"
 ${log}::error "Error message"
 
+# ------------------- Set up configuration file -----------------------
+
+lappend ::auto_path ./lib/inifile
+package require inifile
 
 
 # ------------------------ Set up buttons -----------------------------
 
 # Using curly braces around callback function causes late binding --
 # value sent is the value when the button was pushed.
-ttk::button .calc_butt -text "Calculate" -command {calculate $hexnum}
+ttk::button .calc_butt -text "Calculate" -command {calculate 0x${hexnum}}
 
 # ------------------------ Hex code entry -----------------------------
 frame .entry_frme

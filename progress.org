@@ -1,0 +1,21 @@
+#+CATEGORY: bitdecode
+* bitdecode project progress
+* ---------------------------- Dated notes ----------------------------
+* <2014-12-24 Wed> Created this project
+* <2014-12-24 Wed> Managing modules
+  - I'm having trouble using the inifile module, even though it's part
+    of the Tcl standard library.  The fix is to copy the inifil
+    package directory from C:\Tcl\tcllib-trunk\tcllib-trunk\modules, or
+    wherever your tcllib is stored, to a lib directory in the projec
+    directory.  You can then add the line
+  - lappend ::auto_path ./lib/inifil
+  - ...to your script, followed by the line
+  - package require inifile
+  - ...to load the module.  Look in ini.tcl to see which version
+    you're using.
+* ----------------------------- TODO list -----------------------------
+* Work on executables
+* Work on bitdecode
+** TODO Move logger to a separate file
+** DONE Input number interpreted as hex
+** TODO Add config file parser
