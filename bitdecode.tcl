@@ -25,10 +25,12 @@ set loglevel debug
 font create FixedFont -family TkFixedFont -size 12
 font create LogFont -family TkFixedFont -size 8; # Font for console log
 
-
-
-
-
+proc modinfo {modname} {
+    set modver [package require $modname]
+    set modlist [package ifneeded $modname $modver]
+    set modpath [lindex $modlist end]
+    return "Loaded $modname module version $modver from ${modpath}."
+}
 
 
 #----------------------------- Set up logger --------------------------
@@ -121,6 +123,7 @@ foreach lvl [logger::levels] {
     ${log}::logproc $lvl log_manager_$lvl
 }
 
+${log}::info [modinfo logger]
 
 # Testing the logger
 .console_text insert end "Current loglevel is: [${log}::currentloglevel] \n"
@@ -133,8 +136,8 @@ ${log}::error "Error message"
 
 # ------------------- Set up configuration file -----------------------
 
-lappend ::auto_path ./lib/inifile
 package require inifile
+${log}::info [modinfo inifile]
 
 
 # ------------------------ Set up buttons -----------------------------
