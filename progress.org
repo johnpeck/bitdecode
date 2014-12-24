@@ -8,11 +8,18 @@
     package directory from C:\Tcl\tcllib-trunk\tcllib-trunk\modules, or
     wherever your tcllib is stored, to a lib directory in the projec
     directory.  You can then add the line
-  - lappend ::auto_path ./lib/inifil
+  - lappend ::auto_path ./lib/inifile
   - ...to your script, followed by the line
   - package require inifile
   - ...to load the module.  Look in ini.tcl to see which version
     you're using.
+* <2014-12-24 Wed> Notes on using teacup
+** Documentation
+   - http://wiki.tcl.tk/17305
+** Installing a package
+   - teacup install inifile
+** Seeing all packages available
+   - http://teapot.activestate.com/index
 * ----------------------------- TODO list -----------------------------
 * Work on executables
 * Work on bitdecode

@@ -16,6 +16,7 @@ SDX = "/cygdrive/c/tclkit/sdx.kit"
 # List of modules to copy over into the starkit.  Download tcllib from
 # core.tcl.tk.
 MODULES = "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/log" \
+          "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/inifile" \
           "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/calendar"
 
 #------------------------- Done with configuration ---------------------
