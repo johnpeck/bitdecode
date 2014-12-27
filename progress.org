@@ -23,6 +23,6 @@
 * ----------------------------- TODO list -----------------------------
 * Work on executables
 * Work on bitdecode
+** DONE Add config file parser
 ** TODO Move logger to a separate file
 ** DONE Input number interpreted as hex
-** TODO Add config file parser
