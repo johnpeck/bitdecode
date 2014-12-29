@@ -39,6 +39,8 @@ help:
 	@echo '   make starpack                                      '
 	@echo '       Make starpack                                  '
 
+# Make the starkit.  Do not use qwrap here, since it only permits one
+# tcl file.
 .PHONY: starkit
 starkit: $(MAINFILE).kit
 $(MAINFILE).kit: $(MAINFILE).tcl \
@@ -48,18 +50,24 @@ $(MAINFILE).kit: $(MAINFILE).tcl \
                  $(MAINFILE).vfs/lib \
                  $(MAINFILE).vfs/lib/app-$(MAINFILE) \
                  $(MAINFILE).vfs/lib/app-$(MAINFILE)/pkgIndex.tcl
-	# $(TCLKITSH) $(SDXNP) qwrap $<
 	@echo 'Making starkit'
-	# $(TCLKITSH) $(SDXNP) wrap $(MAINFILE)
-	# mv $(MAINFILE) $@
+	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE)
+	mv $(MAINFILE) $@
 
 $(MAINFILE).vfs:
 	mkdir $@
 
+# Now source all the tcl code into the top of the vfs tree.  Note that
+# you also have to replace each 'source' line from your tcl files with
+# a command to source a file relative to the top of the vfs.
+# Otherwise, tcl has no idea where these files are.
 $(MAINFILE).vfs/main.tcl: $(MAINFILE).vfs
-	echo "package require starkit" > $@
-	echo "starkit::startup" >> $@
-	echo "package require app-$(MAINFILE)" >> $@
+	echo 'package require starkit' > $@
+	echo 'if {[starkit::startup] ne "sourced"} {' >> $@
+	echo '    source [file join $$starkit::topdir'\
+             'lib/app-$(MAINFILE)/$(MAINFILE).tcl]' >> $@
+	echo '}' >> $@
+
 
 $(MAINFILE).vfs/lib: $(MAINFILE).vfs
 	mkdir $@
@@ -69,11 +77,24 @@ $(MAINFILE).vfs/lib: $(MAINFILE).vfs
 $(MAINFILE).vfs/lib/app-$(MAINFILE): $(MAINFILE).vfs \
                                      $(MAINFILE).vfs/lib
 	mkdir $@
-	cp $(MAINFILE).tcl $@
 	cp $(SRC) $@
 
-$(MAINFILE).vfs/lib/app-$(MAINFILE)/pkgIndex.tcl: $(MAINFILE).vfs/lib/app-$(MAINFILE)
-	echo 'pkg_mkIndex $<' | tclsh
+
+# Now we need to replace every instance of 'source something.tcl' with
+# source [file join $starkit::topdir lib/app-bitdecode/something.tcl]
+# so that the starkit can find the tcl file in the vfs.  In this sed command,
+# we match <anything>tcl and substitute the match (via the &) into the
+# replacement string.  This just replaces all tcl filenames with their
+# starkit-located replacements.
+SOURCESTR := [file join $$starkit::topdir lib/app-$(MAINFILE)/&]
+$(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl: $(MAINFILE).vfs \
+                                                     $(MAINFILE).vfs/lib
+	sed 's,[[:graph:]]*tcl,$(SOURCESTR),g' < $(MAINFILE).tcl > $@
+
+$(MAINFILE).vfs/lib/app-$(MAINFILE)/pkgIndex.tcl: \
+  $(MAINFILE).vfs/lib/app-$(MAINFILE) \
+  $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl
+	echo 'pkg_mkIndex $< *.tcl' | tclsh
 
 # To create the starpack, we have to copy the modules we need into the
 # lib directory of the virtual filesystem.  This lib directory is
@@ -94,4 +115,5 @@ $(MAINFILE).exe: $(MAINFILE).kit
 .PHONY: clean
 clean:
 	rm -rf $(MAINFILE).vfs
+	rm -f $(MAINFILE).bat
 
