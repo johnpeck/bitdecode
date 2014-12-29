@@ -3,6 +3,9 @@
 # The name of the program or executable -- no extensions
 MAINFILE = bitdecode
 
+# Other supporting files (with extensions)
+SRC = loggerconf.tcl
+
 # The runtime engine to package in the starpack.  This, of course, has
 # to run on the machine you're targeting.
 TCLKIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"
@@ -39,34 +42,38 @@ help:
 .PHONY: starkit
 starkit: $(MAINFILE).kit
 $(MAINFILE).kit: $(MAINFILE).tcl \
+                 $(SRC) \
                  $(MAINFILE).vfs \
-                 $(MAINFILE).vfs/lib \
-                 $(MAINFILE).vfs/$(MAINFILE).tcl \
                  $(MAINFILE).vfs/main.tcl \
-                 $(MAINFILE).vfs/loggerconf.tcl \
+                 $(MAINFILE).vfs/lib \
+                 $(MAINFILE).vfs/lib/app-$(MAINFILE) \
+                 $(MAINFILE).vfs/lib/app-$(MAINFILE)/pkgIndex.tcl
 	# $(TCLKITSH) $(SDXNP) qwrap $<
 	@echo 'Making starkit'
-	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE)
-	mv $(MAINFILE) $@
-
-$(MAINFILE).vfs/loggerconf.tcl: loggerconf.tcl \
-                                $(MAINFILE).vfs
-	cp $< $@
+	# $(TCLKITSH) $(SDXNP) wrap $(MAINFILE)
+	# mv $(MAINFILE) $@
 
 $(MAINFILE).vfs:
 	mkdir $@
 
-$(MAINFILE).vfs/lib: $(MAINFILE).vfs
-	mkdir $@
-
 $(MAINFILE).vfs/main.tcl: $(MAINFILE).vfs
 	echo "package require starkit" > $@
-	echo "if {[starkit::startup] ne \"sourced\"} {" >> $@
-	echo "    source [file join \$$starkit::topdir $(MAINFILE).tcl]" >> $@
-	echo "}" >> $@
+	echo "starkit::startup" >> $@
+	echo "package require app-$(MAINFILE)" >> $@
 
-$(MAINFILE).vfs/$(MAINFILE).tcl: $(MAINFILE).tcl
-	cp $< $@
+$(MAINFILE).vfs/lib: $(MAINFILE).vfs
+	mkdir $@
+	cp -R $(MODULES) $@
+	chmod -R a+rx *
+
+$(MAINFILE).vfs/lib/app-$(MAINFILE): $(MAINFILE).vfs \
+                                     $(MAINFILE).vfs/lib
+	mkdir $@
+	cp $(MAINFILE).tcl $@
+	cp $(SRC) $@
+
+$(MAINFILE).vfs/lib/app-$(MAINFILE)/pkgIndex.tcl: $(MAINFILE).vfs/lib/app-$(MAINFILE)
+	echo 'pkg_mkIndex $<' | tclsh
 
 # To create the starpack, we have to copy the modules we need into the
 # lib directory of the virtual filesystem.  This lib directory is
@@ -83,4 +90,8 @@ $(MAINFILE).exe: $(MAINFILE).kit
 	cd temp/$(MAINFILE).vfs/lib; chmod -R a+rx *
 	cd temp; $(TCLKITSH) $(SDXNP) wrap $(MAINFILE).kit -runtime $(TCLKITNP)
 	mv temp/$(MAINFILE).kit $@
+
+.PHONY: clean
+clean:
+	rm -rf $(MAINFILE).vfs
 
