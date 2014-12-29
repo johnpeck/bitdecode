@@ -3,7 +3,9 @@
 # By default, the software will look for the configuration file in the
 # directory from which it was launched.  If the configuration file is
 # not found, one will be created.
-set configfile "[file rootname $argv0].cfg"
+set configfile "bitdecode.cfg"
+
+set logfile "bitdecode.log"
 
 # This software's version
 set revcode 1.0
@@ -47,7 +49,9 @@ source loggerconf.tcl
 ${log}::info [modinfo logger]
 
 # Testing the logger
+
 .console_text insert end "Current loglevel is: [${log}::currentloglevel] \n"
+${log}::info "Trying to log to [file normalize $logfile]"
 ${log}::info "Known log levels: [logger::levels]"
 ${log}::info "Known services: [logger::services]"
 ${log}::debug "Debug message"
@@ -83,10 +87,10 @@ proc config_write {configfile} {
 
 if {[file exists $configfile] == 0} {
     # The config file does not exist
-    ${log}::info "Creating new configuration file $configfile"
+    ${log}::info "Creating new configuration file [file normalize $configfile]"
     set fcon [ini::open $configfile w]
     ini::close $fcon
-    # config_write $configfile
+    config_write $configfile
 }
 
 
@@ -186,9 +190,6 @@ proc showAbout {} {
 foreach cbval $butvallist {
     set $cbval 0
 }
-
-
-${log}::info "Trying to log to [file rootname $argv0].log"
 
 # Calculate button callback.  I'm ok with using upvar to pull in the
 # logger so it doesn't have to be passed around.

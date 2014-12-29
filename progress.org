@@ -22,7 +22,11 @@
    - http://teapot.activestate.com/index
 * ----------------------------- TODO list -----------------------------
 * Work on executables
+** DONE Log file must change name inside starkit
+   - If we're inside a starkit, the log file has the basename "main"
+     instead of bitdecode.
 * Work on bitdecode
+** TODO Read config file version, compare to software version
 ** DONE Add config file parser
-** TODO Move logger to a separate file
+** DONE Move logger to a separate file
 ** DONE Input number interpreted as hex

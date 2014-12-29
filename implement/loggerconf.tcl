@@ -21,8 +21,9 @@ ${::log}::setlevel $loglevel; # Set the log level
 
 
 proc log_to_file {txt} {
-    upvar #0 argv0 thisScript; # Associate thisScript with the argv0
-    set logfile "[file rootname $thisScript].log"
+    # upvar #0 argv0 thisScript; # Associate thisScript with the argv0
+    # set logfile "[file rootname $thisScript].log"
+    global logfile
     set f [open $logfile {WRONLY CREAT APPEND}] ;# instead of "a"
     fconfigure $f -encoding utf-8
     puts $f $txt

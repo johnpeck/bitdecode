@@ -49,7 +49,7 @@ $(MAINFILE).kit: $(MAINFILE).tcl \
                  $(MAINFILE).vfs/main.tcl \
                  $(MAINFILE).vfs/lib \
                  $(MAINFILE).vfs/lib/app-$(MAINFILE) \
-                 $(MAINFILE).vfs/lib/app-$(MAINFILE)/pkgIndex.tcl
+                 $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl
 	@echo 'Making starkit'
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE)
 	mv $(MAINFILE) $@
@@ -68,7 +68,7 @@ $(MAINFILE).vfs/main.tcl: $(MAINFILE).vfs
              'lib/app-$(MAINFILE)/$(MAINFILE).tcl]' >> $@
 	echo '}' >> $@
 
-
+# Creating the lib directory also copies all the needed modules.
 $(MAINFILE).vfs/lib: $(MAINFILE).vfs
 	mkdir $@
 	cp -R $(MODULES) $@
@@ -91,26 +91,32 @@ $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl: $(MAINFILE).vfs \
                                                      $(MAINFILE).vfs/lib
 	sed 's,[[:graph:]]*tcl,$(SOURCESTR),g' < $(MAINFILE).tcl > $@
 
-$(MAINFILE).vfs/lib/app-$(MAINFILE)/pkgIndex.tcl: \
-  $(MAINFILE).vfs/lib/app-$(MAINFILE) \
-  $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl
-	echo 'pkg_mkIndex $< *.tcl' | tclsh
 
-# To create the starpack, we have to copy the modules we need into the
-# lib directory of the virtual filesystem.  This lib directory is
-# added to the auto_path variable by the tclkit when the starkit is
-# run.
+# The starpack is the same as a starkit with a built-in tclkit.  The
+# wrap command is the only difference.
 .PHONY: starpack
 starpack: $(MAINFILE).exe
-$(MAINFILE).exe: $(MAINFILE).kit
-	rm -rf temp
-	mkdir temp
-	cp $^ temp/$(MAINFILE).kit
-	cd temp; $(TCLKITSH) $(SDXNP) unwrap $(MAINFILE).kit
-	cp -R $(MODULES) temp/$(MAINFILE).vfs/lib
-	cd temp/$(MAINFILE).vfs/lib; chmod -R a+rx *
-	cd temp; $(TCLKITSH) $(SDXNP) wrap $(MAINFILE).kit -runtime $(TCLKITNP)
-	mv temp/$(MAINFILE).kit $@
+$(MAINFILE).exe: starkit
+	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(TCLKITNP)
+	mv $(MAINFILE) $@
+
+
+
+
+
+
+
+
+# $(MAINFILE).exe: $(MAINFILE).tcl \
+#                  $(SRC) \
+#                  $(MAINFILE).vfs \
+#                  $(MAINFILE).vfs/main.tcl \
+#                  $(MAINFILE).vfs/lib \
+#                  $(MAINFILE).vfs/lib/app-$(MAINFILE) \
+#                  $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl
+# 	@echo 'Making starpack'
+# 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(TCLKITNP)
+# 	mv $(MAINFILE) $@
 
 .PHONY: clean
 clean:
