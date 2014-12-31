@@ -1,5 +1,8 @@
 # Set up a visual console for logging
-frame .console_frme -relief groove
+ttk::labelframe .console_frme -text "Execution log"\
+    -labelanchor n\
+    -borderwidth 1\
+    -relief groove
 # Set up the text widget.  Specify -width in units of characters in
 # the -font option
 text .console_text -yscrollcommand {.console_scrl set} \

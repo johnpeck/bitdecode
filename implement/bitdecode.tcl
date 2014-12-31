@@ -65,21 +65,25 @@ package require inifile
 ${log}::info [modinfo inifile]
 
 
-proc config_write {configfile} {
-    # Write a configuration file
+proc config.init {} {
+    # Write an initial configuration file
     #
     # Arguments:
-    #   configfile -- Configuration file name (with path)
+    #   None
     global log
     global revcode
+    global configfile
     set fcon [ini::open $configfile w]
+    # ---------------------- Private section --------------------------
     ini::set $fcon private version $revcode
     ini::comment $fcon private "" "Internal use -- do not edit."
+    
     ini::set $fcon junk key "Some junk"
     ini::comment $fcon junk "" "Some comment about junk section."
     ini::set $fcon crap newkey "Some crap"
     ini::comment $fcon crap "" "Some comment about crap section."
     ini::comment $fcon crap newkey "Some comment about newkey."
+    # ini::set $fcon bitlabels byte1bit0 "My bit label"
     ini::commit $fcon
     ini::close $fcon
     
@@ -90,25 +94,86 @@ if {[file exists $configfile] == 0} {
     ${log}::info "Creating new configuration file [file normalize $configfile]"
     set fcon [ini::open $configfile w]
     ini::close $fcon
-    config_write $configfile
+    config.init
+} else {
+    ${log}::info "Reading configuration file [file normalize $configfile]"
+    set fcon [ini::open $configfile r]
+    ${log}::info "Configuration file version is\
+                  [ini::value $fcon private version]"
+    ini::close $fcon
+}
+
+proc config.getvar {section key} {
+    # Return the value corresponding to the section and key arguments.
+    #
+    # Will return an empty string if the value doesn't exist.
+    # 
+    # Arguments:
+    #  section -- Configuration file section
+    #  key -- Configuration key in the specified section
+    global log
+    global configfile
+    set fcon [ini::open $configfile r]
+    if {[ini::exists $fcon $section $key]} {
+	set retvar [ini::value $fcon $section $key]
+	ini::close $fcon
+	return $retvar
+    } else {
+	ini::close $fcon
+	return ""
+    }
+}
+
+proc config.setvar {section key value} {
+    # Set the key value in the specified section of the config file
+    #
+    # Arguments:
+    #  section -- Configuration file section
+    #  key -- Configuration key in the specified section
+    #  value -- Configuration value for the specified key
+    global log
+    global configfile
+    set fcon [ini::open $configfile r+]
+    ini::set $fcon $section $key $value
+    ini::commit $fcon
+    ini::close $fcon
 }
 
 
 
-# ------------------------ Set up buttons -----------------------------
-
-# Using curly braces around callback function causes late binding --
-# value sent is the value when the button was pushed.
-ttk::button .calc_butt -text "Calculate" -command {calculate 0x${hexnum}}
 
 # ------------------------ Hex code entry -----------------------------
 frame .entry_frme
 ttk::label .entry_frme.0x_labl -text "0x" -font FixedFont
-entry .entry_frme.hex_enty -relief groove \
-    -textvariable hexnum \
+# The checkbuttons will be set when the hex code entry is validated.
+ttk::entry .entry_frme.hex_enty\
+    -textvariable hexnum\
+    -validate key\
+    -validatecommand {hexvalidate 0x%P}\
     -width 4 \
     -font FixedFont
 
+proc hexvalidate {hexnum} {
+    global log
+    ${log}::debug "Checking input $hexnum"
+    if {[string compare $hexnum "0x{}"] == 0} {
+	# The input string is empty -- this is ok
+	bitcalc 0
+	return 1
+    }
+    if {[string is integer $hexnum] != 1} {
+	# The input string is not a number -- not ok
+	return 0
+    }
+    if {[expr $hexnum <= 0xffff]} {
+	${log}::debug "Entry is ok"
+	bitcalc $hexnum
+	return 1
+    } else {
+	${log}::debug "Entry is not ok"
+	return 0
+    }	
+}
 
 # ---------------------- Set up pull-down menu ------------------------
 menu .menubar
@@ -130,24 +195,57 @@ menu .menubar.help -tearoff 0
 set butvallist []; # List of checkbutton variables
 frame .bitarray_frme; # The master frame for both byte frames
 
-frame .byte1_frme; # The frame for the first byte
+# The first byte bits will be in a frame
+ttk::labelframe .byte1_frme -text "Byte 1"\
+    -labelanchor n\
+    -borderwidth 1\
+    -relief sunken
 for {set bitnum 0} {$bitnum<8} {incr bitnum} {
+    set bitlabel [config.getvar bitlabels byte1bit$bitnum]
+    if {[string length $bitlabel] == 0} {
+	# The bitlabel wasn't found in the config file
+	set bitlabel "Byte 1, bit $bitnum"
+	config.setvar bitlabels byte1bit$bitnum $bitlabel
+    }
     ttk::checkbutton .byte1_bit${bitnum}_cbut \
 	-variable byte1bit${bitnum} \
-	-text "Byte 1, bit $bitnum"
+	-text $bitlabel
     lappend butvallist byte1bit${bitnum}
 }
 
-frame .byte2_frme; # The frame for the second byte
+# The second byte bits will also be in a frame
+ttk::labelframe .byte2_frme -text "Byte 2"\
+    -labelanchor n\
+    -borderwidth 1\
+    -relief sunken
 for {set bitnum 0} {$bitnum<8} {incr bitnum} {
+    set bitlabel [config.getvar bitlabels byte2bit$bitnum]
+    if {[string length $bitlabel] == 0} {
+	# The bitlabel wasn't found in the config file
+	set bitlabel "Byte 2, bit $bitnum"
+	config.setvar bitlabels byte2bit$bitnum $bitlabel
+    }
     ttk::checkbutton .byte2_bit${bitnum}_cbut \
 	-variable byte2bit${bitnum} \
-	-text "Byte 2, bit $bitnum"
+	-text $bitlabel
     lappend butvallist byte2bit${bitnum}
 }
 
 
 
+proc bitcalc {hexnum} {
+    # Set checkbuttons according to hex entry
+    global log
+    global butvallist
+    ${log}::info "Button was pressed with $hexnum"
+    foreach cbval $butvallist {
+	# Loop through each checkbutton variable
+	global $cbval; # Associate with the checkbutton variable
+	set bitval [expr $hexnum % 2]
+	set hexnum [expr $hexnum / 2]
+	set $cbval $bitval
+    }	
+}
 
 #------------------------- Pack widgets -------------------------------
 # Remember that order matters when packing
@@ -157,25 +255,38 @@ pack .console_scrl -fill y -side right -in .console_frme
 pack .console_text -fill x -side bottom -expand 1 -in .console_frme
 
 # The bit array master frame
-pack .bitarray_frme -expand 1 -side bottom
+pack .bitarray_frme -expand 1\
+    -side bottom\
+    -padx 5\
+    -pady 5
 
 # The byte1 frame
-pack .byte1_frme -side left -expand 1 -ipadx 100 -in .bitarray_frme
+pack .byte1_frme -side left\
+    -expand 1\
+    -ipadx 100\
+    -padx 5\
+    -pady 5\
+    -in .bitarray_frme
 for {set bitnum 0} {$bitnum<8} {incr bitnum} {
-    pack .byte1_bit${bitnum}_cbut -in .byte1_frme
+    pack .byte1_bit${bitnum}_cbut -in .byte1_frme -anchor w
 }
 
 # The byte2 frame
-pack .byte2_frme -side right -expand 1 -ipadx 100 -in .bitarray_frme
+pack .byte2_frme -side right\
+    -expand 1\
+    -ipadx 100\
+    -padx 5\
+    -pady 5\
+    -in .bitarray_frme
 for {set bitnum 0} {$bitnum<8} {incr bitnum} {
-    pack .byte2_bit${bitnum}_cbut -in .byte2_frme
+    pack .byte2_bit${bitnum}_cbut -in .byte2_frme -anchor w
 }
 
 pack .entry_frme -padx 5 -pady 5; # Hex word entry frame
 pack .entry_frme.hex_enty -side right
 pack .entry_frme.0x_labl -side left
 
-pack .calc_butt -expand 1 -pady 5; # The calculate button
+
 
 
 
@@ -191,32 +302,6 @@ foreach cbval $butvallist {
     set $cbval 0
 }
 
-# Calculate button callback.  I'm ok with using upvar to pull in the
-# logger so it doesn't have to be passed around.
-proc calculate {hexnum} {
-    upvar 1 log inlog
-    upvar 1 butvallist inbutvallist
-    ${inlog}::info "Button was pressed with $hexnum"
-    set shift 0
-    foreach cbval $inbutvallist {
-	# Loop through each checkbutton variable
-	${inlog}::debug "Working with $cbval"
-	global $cbval; # Associate with the checkbutton variable
-	set bitval [expr $hexnum % 2]
-	set hexnum [expr $hexnum / 2]
-	${inlog}::debug "Setting $cbval to $bitval"
-	set $cbval $bitval
-	incr shift
-    }	
-}
 
-
-
-proc getfiledata {filepath} {
-    set fp [open $filepath r]
-    set filedata [read $fp]
-    close $fp
-    return $filedata
-}
 
 

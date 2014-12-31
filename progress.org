@@ -26,7 +26,10 @@
    - If we're inside a starkit, the log file has the basename "main"
      instead of bitdecode.
 * Work on bitdecode
-** TODO Read config file version, compare to software version
+** TODO Hex code entry must limit to 4 characters
+** TODO Clicking on checkbox must recalculate hex entry
+** DONE Bit labels must be set from configuration file
+** DONE Read config file version, compare to software version
 ** DONE Add config file parser
 ** DONE Move logger to a separate file
 ** DONE Input number interpreted as hex
