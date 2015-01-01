@@ -6,6 +6,11 @@ MAINFILE = bitdecode
 # Other supporting files (with extensions)
 SRC = loggerconf.tcl
 
+# Files to be copied into the icons directory (from the icons directory)
+ICONS = calc.png
+
+
+
 # The runtime engine to package in the starpack.  This, of course, has
 # to run on the machine you're targeting.
 TCLKIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"

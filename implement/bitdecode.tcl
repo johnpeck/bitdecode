@@ -202,9 +202,9 @@ menu .menubar.help -tearoff 0
     -underline 0 -command showAbout
 
 # Create window icon
-set wmiconfile ./images/icons/16x16/calc.png
-set icon [image create photo -format png -file $wmiconfile]
-wm iconphoto . $icon
+set wmiconfile ./icons/calc_16x16.png
+set wmicon [image create photo -format png -file $wmiconfile]
+wm iconphoto . $wmicon
 
 # ----------------------- Check buttons for bits ----------------------
 
