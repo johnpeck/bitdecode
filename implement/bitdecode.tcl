@@ -175,6 +175,24 @@ proc hexvalidate {hexnum} {
     }	
 }
 
+proc hexcalc {} {
+    # Calcuate hex input based on check button states
+    #
+    # Arguments:
+    #   None
+    global log
+    global butvallist
+    global hexnum
+    set sum 0
+    set base 1
+    foreach cbval $butvallist {
+	global $cbval
+	incr sum [expr $$cbval * $base]
+	set base [expr $base << 1]
+    }
+    set hexnum [format %0x $sum]
+}
+
 # ---------------------- Set up pull-down menu ------------------------
 menu .menubar
 menu .menubar.help -tearoff 0
@@ -183,6 +201,10 @@ menu .menubar.help -tearoff 0
 .menubar.help add command -label {About bitdecode...} \
     -underline 0 -command showAbout
 
+# Create window icon
+set wmiconfile ./images/icons/16x16/calc.png
+set icon [image create photo -format png -file $wmiconfile]
+wm iconphoto . $icon
 
 # ----------------------- Check buttons for bits ----------------------
 
@@ -209,7 +231,8 @@ for {set bitnum 0} {$bitnum<8} {incr bitnum} {
     }
     ttk::checkbutton .byte1_bit${bitnum}_cbut \
 	-variable byte1bit${bitnum} \
-	-text $bitlabel
+	-text $bitlabel \
+	-command hexcalc
     lappend butvallist byte1bit${bitnum}
 }
 
@@ -227,7 +250,8 @@ for {set bitnum 0} {$bitnum<8} {incr bitnum} {
     }
     ttk::checkbutton .byte2_bit${bitnum}_cbut \
 	-variable byte2bit${bitnum} \
-	-text $bitlabel
+	-text $bitlabel \
+	-command hexcalc
     lappend butvallist byte2bit${bitnum}
 }
 
@@ -237,7 +261,6 @@ proc bitcalc {hexnum} {
     # Set checkbuttons according to hex entry
     global log
     global butvallist
-    ${log}::info "Button was pressed with $hexnum"
     foreach cbval $butvallist {
 	# Loop through each checkbutton variable
 	global $cbval; # Associate with the checkbutton variable
@@ -293,9 +316,13 @@ pack .entry_frme.0x_labl -side left
 
 #  Define a procedure - an action for Help-About
 proc showAbout {} {
-    tk_messageBox -message "Tcl/Tk\nHello Windows\nVersion 1.0" \
+    global log
+    global revcode
+    tk_messageBox -message "bitdecode\nVersion $revcode" \
 	-title {About bitdecode}
 }
+
+#--------------------------- Initialize -------------------------------
 
 # Initialize all bits to zero
 foreach cbval $butvallist {
