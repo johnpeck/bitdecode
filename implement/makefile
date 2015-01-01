@@ -6,6 +6,8 @@ MAINFILE = bitdecode
 # Other supporting files (with extensions)
 SRC = loggerconf.tcl
 
+ICONSDIR = icons
+
 # Files to be copied into the icons directory (from the icons directory)
 ICONS = calc.png
 
@@ -54,6 +56,7 @@ $(MAINFILE).kit: $(MAINFILE).tcl \
                  $(MAINFILE).vfs/main.tcl \
                  $(MAINFILE).vfs/lib \
                  $(MAINFILE).vfs/lib/app-$(MAINFILE) \
+                 $(MAINFILE).vfs/lib/app-$(MAINFILE)/icons \
                  $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl
 	@echo 'Making starkit'
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE)
@@ -79,10 +82,19 @@ $(MAINFILE).vfs/lib: $(MAINFILE).vfs
 	cp -R $(MODULES) $@
 	chmod -R a+rx *
 
+
+# Copy supporting files (like sourced tcl files) into the
+# /lib/app-$(MAINFILE) directory along with $(MAINFILE).tcl
 $(MAINFILE).vfs/lib/app-$(MAINFILE): $(MAINFILE).vfs \
                                      $(MAINFILE).vfs/lib
 	mkdir $@
 	cp $(SRC) $@
+
+# Create the icons directory to mirror that used in development.
+$(MAINFILE).vfs/lib/app-$(MAINFILE)/icons:
+	mkdir $@
+	cp $(ICONSDIR)/$(ICONS) $@
+
 
 
 # Now we need to replace every instance of 'source something.tcl' with
