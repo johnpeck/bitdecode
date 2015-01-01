@@ -9,7 +9,7 @@ SRC = loggerconf.tcl
 ICONSDIR = icons
 
 # Files to be copied into the icons directory (from the icons directory)
-ICONS = calc.png
+ICONS = calc_16x16.png
 
 
 
@@ -97,16 +97,23 @@ $(MAINFILE).vfs/lib/app-$(MAINFILE)/icons:
 
 
 
-# Now we need to replace every instance of 'source something.tcl' with
-# source [file join $starkit::topdir lib/app-bitdecode/something.tcl]
-# so that the starkit can find the tcl file in the vfs.  In this sed command,
-# we match <anything>tcl and substitute the match (via the &) into the
-# replacement string.  This just replaces all tcl filenames with their
-# starkit-located replacements.
+# Fix file path strings for starkits:
+# Was:
+#   source something.tcl
+# Becomes:
+#   source [file join $starkit::topdir lib/app-bitdecode/something.tcl]
+#
+# Was:
+#   set wmiconfile ./icons/calc_16x16.png
+# Becomes:
+#   set wmiconfile [file join $starkit::topdir lib/app-bitdecode/icons/calc_16x16.png]
 SOURCESTR := [file join $$starkit::topdir lib/app-$(MAINFILE)/&]
+ICONSTR := [file join $$starkit::topdir lib/app-$(MAINFILE)/icons/&]
 $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl: $(MAINFILE).vfs \
                                                      $(MAINFILE).vfs/lib
-	sed 's,[[:graph:]]*tcl,$(SOURCESTR),g' < $(MAINFILE).tcl > $@
+	sed 's,[[:graph:]]*tcl,$(SOURCESTR),g' < $(MAINFILE).tcl |\
+	  sed 's,[^/]*\.png,$(ICONSTR),g' |\
+          sed 's,\./icons/,,g' > $@
 
 
 # The starpack is the same as a starkit with a built-in tclkit.  The
@@ -117,23 +124,6 @@ $(MAINFILE).exe: starkit
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(TCLKITNP)
 	mv $(MAINFILE) $@
 
-
-
-
-
-
-
-
-# $(MAINFILE).exe: $(MAINFILE).tcl \
-#                  $(SRC) \
-#                  $(MAINFILE).vfs \
-#                  $(MAINFILE).vfs/main.tcl \
-#                  $(MAINFILE).vfs/lib \
-#                  $(MAINFILE).vfs/lib/app-$(MAINFILE) \
-#                  $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl
-# 	@echo 'Making starpack'
-# 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(TCLKITNP)
-# 	mv $(MAINFILE) $@
 
 .PHONY: clean
 clean:
