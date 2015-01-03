@@ -15,7 +15,7 @@ ICONS = calc_16x16.png
 
 # The runtime engine to package in the starpack.  This, of course, has
 # to run on the machine you're targeting.
-TCLKIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"
+W32KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"
 
 # The tcl shell needed to execute the Starkit Developer tools.  I
 # install the Tcl tools directly from ActiveState
@@ -35,7 +35,7 @@ MODULES = "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/log" \
 # Make a non-posix version of the sdx path for windows.  If you're
 # using windows executables, you can't use POSIX paths for arguments.
 SDXNP = "$(shell cygpath -aw $(SDX))"
-TCLKITNP = "$(shell cygpath -aw $(TCLKIT))"
+W32KITNP = "$(shell cygpath -aw $(W32KIT))"
 
 help:
 	@echo 'Makefile for $(MAINFILE)                              '
@@ -43,8 +43,8 @@ help:
 	@echo 'Usage:                                                '
 	@echo '   make starkit                                       '
 	@echo '       Make starkit                                   '
-	@echo '   make starpack                                      '
-	@echo '       Make starpack                                  '
+	@echo '   make win32                                         '
+	@echo '       Make win32                                     '
 
 # Make the starkit.  Do not use qwrap here, since it only permits one
 # tcl file.
@@ -118,11 +118,15 @@ $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl: $(MAINFILE).vfs \
 
 # The starpack is the same as a starkit with a built-in tclkit.  The
 # wrap command is the only difference.
-.PHONY: starpack
-starpack: $(MAINFILE).exe
-$(MAINFILE).exe: starkit
-	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(TCLKITNP)
+.PHONY: win32
+win32: starpacks/$(MAINFILE)_win32.exe
+starpacks/$(MAINFILE)_win32.exe: starpacks \
+                                 starkit
+	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(W32KITNP)
 	mv $(MAINFILE) $@
+
+starpacks:
+	mkdir $@
 
 
 .PHONY: clean

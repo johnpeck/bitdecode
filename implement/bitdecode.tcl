@@ -77,31 +77,18 @@ proc config.init {} {
     # ---------------------- Private section --------------------------
     ini::set $fcon private version $revcode
     ini::comment $fcon private "" "Internal use -- do not edit."
-    
     ini::set $fcon junk key "Some junk"
     ini::comment $fcon junk "" "Some comment about junk section."
     ini::set $fcon crap newkey "Some crap"
     ini::comment $fcon crap "" "Some comment about crap section."
     ini::comment $fcon crap newkey "Some comment about newkey."
-    # ini::set $fcon bitlabels byte1bit0 "My bit label"
+    config.seccom bitlabels "Comment about bitlabels"
     ini::commit $fcon
     ini::close $fcon
-    
+    config.seccom bitlabels "Comment about bitlabels"
 }
 
-if {[file exists $configfile] == 0} {
-    # The config file does not exist
-    ${log}::info "Creating new configuration file [file normalize $configfile]"
-    set fcon [ini::open $configfile w]
-    ini::close $fcon
-    config.init
-} else {
-    ${log}::info "Reading configuration file [file normalize $configfile]"
-    set fcon [ini::open $configfile r]
-    ${log}::info "Configuration file version is\
-                  [ini::value $fcon private version]"
-    ini::close $fcon
-}
+
 
 proc config.getvar {section key} {
     # Return the value corresponding to the section and key arguments.
@@ -139,7 +126,46 @@ proc config.setvar {section key value} {
     ini::close $fcon
 }
 
-
+proc config.seccom {section comment} {
+    # Add a section comment to the configuration file.  The section
+    # will be created if it doesn't yet exist.
+    #
+    # Arguments:
+    #  section -- Configuration file section
+    #  comment -- Comment string
+    global log
+    global configfile
+    set fcon [ini::open $configfile r+]
+    if {[ini::exists $fcon $section] != 1} {
+	# The section does not exist, so create it
+	${log}::debug "Creating dummy key in $section section"
+	ini::set $fcon $section junk junky
+	set mustclean 1
+    } else {
+	set mustclean 0
+    }
+    ini::comment $fcon $section "" $comment
+    if {$mustclean} {
+	${log}::debug "Deleting dummy key"
+	ini::delete $fcon $section junk
+    }
+    ini::commit $fcon
+    ini::close $fcon
+}
+	
+if {[file exists $configfile] == 0} {
+    # The config file does not exist
+    ${log}::info "Creating new configuration file [file normalize $configfile]"
+    set fcon [ini::open $configfile w]
+    ini::close $fcon
+    config.init
+} else {
+    ${log}::info "Reading configuration file [file normalize $configfile]"
+    set fcon [ini::open $configfile r]
+    ${log}::info "Configuration file version is\
+                  [ini::value $fcon private version]"
+    ini::close $fcon
+}
 
 
 # ------------------------ Hex code entry -----------------------------
