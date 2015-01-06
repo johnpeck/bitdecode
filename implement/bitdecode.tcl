@@ -77,15 +77,10 @@ proc config.init {} {
     # ---------------------- Private section --------------------------
     ini::set $fcon private version $revcode
     ini::comment $fcon private "" "Internal use -- do not edit."
-    ini::set $fcon junk key "Some junk"
-    ini::comment $fcon junk "" "Some comment about junk section."
-    ini::set $fcon crap newkey "Some crap"
-    ini::comment $fcon crap "" "Some comment about crap section."
-    ini::comment $fcon crap newkey "Some comment about newkey."
-    config.seccom bitlabels "Comment about bitlabels"
     ini::commit $fcon
     ini::close $fcon
-    config.seccom bitlabels "Comment about bitlabels"
+    # -------------------- bitlabels section --------------------------
+    config.seccom bitlabels "Labels for individual bits"
 }
 
 
@@ -169,8 +164,12 @@ if {[file exists $configfile] == 0} {
 
 
 # ------------------------ Hex code entry -----------------------------
-frame .entry_frme
-ttk::label .entry_frme.0x_labl -text "0x" -font FixedFont
+ttk::labelframe .entry_frme -text "Hex code"\
+    -labelanchor n\
+    -borderwidth 1\
+    -relief sunken
+ttk::label .entry_frme.0x_labl -text "0x"\
+    -font FixedFont
 # The checkbuttons will be set when the hex code entry is validated.
 ttk::entry .entry_frme.hex_enty\
     -textvariable hexnum\
@@ -332,8 +331,11 @@ for {set bitnum 0} {$bitnum<8} {incr bitnum} {
 }
 
 pack .entry_frme -padx 5 -pady 5; # Hex word entry frame
-pack .entry_frme.hex_enty -side right
-pack .entry_frme.0x_labl -side left
+pack .entry_frme.hex_enty -side right\
+    -padx {0 100}\
+    -pady 5
+pack .entry_frme.0x_labl -side left\
+    -padx {100 0}
 
 
 
