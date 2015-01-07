@@ -1,7 +1,8 @@
 
 # --------------------- Root window parameters ------------------------
 # Set the width of the window in characters
-set rootwinparams [dict create width 100]
+set rootwinparams [dict create width 700]
+dict set rootwinparams height 500
 
 
 
@@ -234,7 +235,7 @@ menu .menubar.help -tearoff 0
     -underline 0 -command showAbout
 
 
-wm geometry . 1000x700+5+40
+wm geometry . [dict get $rootwinparams width]x[dict get $rootwinparams height]
 
 # Create window icon
 set wmiconfile ./icons/calc_16x16.png
