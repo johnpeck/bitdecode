@@ -24,8 +24,10 @@ TCLKITSH = "/cygdrive/c/Tcl/bin/tclsh.exe"
 # Download Starkit Developer Extension from whereever
 SDX = "/cygdrive/c/tclkit/sdx.kit"
 
-# List of modules to copy over into the starkit.  Download tcllib from
-# core.tcl.tk.
+# List of modules to copy over into the starkit.  Download the zip
+# archive of tcllib from core.tcl.tk.  Unzip it and run the installer
+# program in the root directory.  This will install modules into
+# C:\Tcl\lib\tcllib1.16 (or whatever version you get).
 MODULES = "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/log" \
           "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/inifile" \
           "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/calendar"

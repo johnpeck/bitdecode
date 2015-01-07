@@ -1,4 +1,9 @@
 
+# --------------------- Root window parameters ------------------------
+# Set the width of the window in characters
+set rootwinparams [dict create width 100]
+
+
 
 # By default, the software will look for the configuration file in the
 # directory from which it was launched.  If the configuration file is
@@ -58,6 +63,8 @@ ${log}::debug "Debug message"
 ${log}::info "Info message"
 ${log}::warn "Warn message"
 ${log}::error "Error message"
+
+${log}::info "Root window width set to [dict get $rootwinparams width]"
 
 # ------------------- Set up configuration file -----------------------
 
@@ -225,6 +232,9 @@ menu .menubar.help -tearoff 0
 . configure -menu .menubar -width 200 -height 150
 .menubar.help add command -label {About bitdecode...} \
     -underline 0 -command showAbout
+
+
+wm geometry . 1000x700+5+40
 
 # Create window icon
 set wmiconfile ./icons/calc_16x16.png
