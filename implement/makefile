@@ -3,9 +3,13 @@
 # The name of the program or executable -- no extensions
 MAINFILE = bitdecode
 
+# The version code
+REVCODE = 1.1
+
 # Other supporting files (with extensions)
 SRC = loggerconf.tcl
 
+# Directory for icons
 ICONSDIR = icons
 
 # Files to be copied into the icons directory (from the icons directory)
@@ -30,10 +34,6 @@ SDX = "/cygdrive/c/tclkit/sdx.kit"
 # program in the root directory.  This will install modules into
 # C:\Tcl\lib\tcllib1.16 (or whatever version you get).
 TCLLIBPATH = "/cygdrive/c/Tcl/lib/tcllib1.16"
-
-# MODULES = "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/log" \
-#           "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/inifile" \
-#           "/cygdrive/c/Tcl/tcllib-trunk/tcllib-trunk/modules/calendar"
 
 MODULES = $(TCLLIBPATH)/log \
           $(TCLLIBPATH)/inifile
@@ -130,21 +130,19 @@ $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl: $(MAINFILE).vfs \
 # The starpack is the same as a starkit with a built-in tclkit.  The
 # wrap command is the only difference.
 .PHONY: win32
-win32: starpacks/$(MAINFILE)_win32.exe
-starpacks/$(MAINFILE)_win32.exe: starpacks \
-                                 starkit
+win32: starpacks/$(REVCODE)/win32/$(MAINFILE).exe
+starpacks/$(REVCODE)/win32/$(MAINFILE).exe: starkit
+	mkdir -p $(dir $@)
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(W32KITNP)
 	mv $(MAINFILE) $@
 
 .PHONY: win64
-win64: starpacks/$(MAINFILE)_win64.exe
-starpacks/$(MAINFILE)_win64.exe: starpacks \
-                                 starkit
+win64: starpacks/$(REVCODE)/win64/$(MAINFILE).exe
+starpacks/$(MAINFILE)_win64.exe: starkit
+	mkdir -p $(dir $@)
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(W64KITNP)
 	mv $(MAINFILE) $@
 
-starpacks:
-	mkdir $@
 
 
 .PHONY: clean

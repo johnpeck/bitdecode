@@ -22,13 +22,17 @@
    - http://teapot.activestate.com/index
 * ----------------------------- TODO list -----------------------------
 * Work on executables
-** TODO Reinstall Tcllib and change makefile to use its sources
+** TODO Version number from makefile must be written to tcl
+   - The question:
+     http://stackoverflow.com/questions/8822097/how-to-replace-the-whole-line-with-sed
+     addresses how to replace an entire line starting with something.
+** DONE Create architecture and version-specific release dirs
+** DONE Reinstall Tcllib and change makefile to use its sources
 ** DONE Log file must change name inside starkit
    - If we're inside a starkit, the log file has the basename "main"
      instead of bitdecode.
 * Work on bitdecode
-** TODO Add comments to bit section of confg
-** TODO Add "file" menu to select multiple config files
+** DONE Add comments to bit section of confg
 ** DONE Clicking on checkbox must recalculate hex entry
 ** DONE Hex code entry must limit to 4 characters
 ** DONE Bit labels must be set from configuration file
