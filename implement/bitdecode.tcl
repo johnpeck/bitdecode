@@ -1,9 +1,6 @@
 
-# --------------------- Root window parameters ------------------------
-# Set the width of the window in characters
-set rootwinparams [dict create width 700]
-dict set rootwinparams height 500
 
+# --------------------- Global configuration --------------------------
 
 
 # By default, the software will look for the configuration file in the
@@ -13,9 +10,9 @@ set configfile "bitdecode.cfg"
 
 set logfile "bitdecode.log"
 
-# This software's version
+# This software's version.  Anything set here will be clobbered by the
+# makefile when starpacks are built.
 set revcode 1.0
-
 
 
 # Set the log level.  Known values are:
@@ -28,6 +25,34 @@ set revcode 1.0
 # alert
 # emergency
 set loglevel debug
+
+
+# -------------------------- Root window ------------------------------
+
+menu .menubar
+menu .menubar.help -tearoff 0
+.menubar add cascade -label Help -menu .menubar.help -underline 0
+. configure -menu .menubar -width 200 -height 150
+.menubar.help add command -label {About bitdecode...} \
+    -underline 0 -command help.about
+
+# Create window icon
+set wmiconfile ./icons/calc_16x16.png
+set wmicon [image create photo -format png -file $wmiconfile]
+wm iconphoto . $wmicon
+
+proc help.about {} {
+    # What to execute when Help-->About is selected
+    #
+    # Arguments:
+    #   None
+    global log
+    global revcode
+    tk_messageBox -message "bitdecode\nVersion $revcode" \
+	-title {About bitdecode}
+}
+
+
 
 # -------------------------- Set up fonts -----------------------------
 
@@ -65,16 +90,17 @@ ${log}::info "Info message"
 ${log}::warn "Warn message"
 ${log}::error "Error message"
 
-${log}::info "Root window width set to [dict get $rootwinparams width]"
+
 
 # ------------------- Set up configuration file -----------------------
 
 package require inifile
 ${log}::info [modinfo inifile]
-
+source config.tcl
 
 proc config.init {} {
-    # Write an initial configuration file
+    # Write an initial configuration file.  This will be
+    # project-dependent, so it can't go in the config.tcl library.
     #
     # Arguments:
     #   None
@@ -92,69 +118,6 @@ proc config.init {} {
 }
 
 
-
-proc config.getvar {section key} {
-    # Return the value corresponding to the section and key arguments.
-    #
-    # Will return an empty string if the value doesn't exist.
-    # 
-    # Arguments:
-    #  section -- Configuration file section
-    #  key -- Configuration key in the specified section
-    global log
-    global configfile
-    set fcon [ini::open $configfile r]
-    if {[ini::exists $fcon $section $key]} {
-	set retvar [ini::value $fcon $section $key]
-	ini::close $fcon
-	return $retvar
-    } else {
-	ini::close $fcon
-	return ""
-    }
-}
-
-proc config.setvar {section key value} {
-    # Set the key value in the specified section of the config file
-    #
-    # Arguments:
-    #  section -- Configuration file section
-    #  key -- Configuration key in the specified section
-    #  value -- Configuration value for the specified key
-    global log
-    global configfile
-    set fcon [ini::open $configfile r+]
-    ini::set $fcon $section $key $value
-    ini::commit $fcon
-    ini::close $fcon
-}
-
-proc config.seccom {section comment} {
-    # Add a section comment to the configuration file.  The section
-    # will be created if it doesn't yet exist.
-    #
-    # Arguments:
-    #  section -- Configuration file section
-    #  comment -- Comment string
-    global log
-    global configfile
-    set fcon [ini::open $configfile r+]
-    if {[ini::exists $fcon $section] != 1} {
-	# The section does not exist, so create it
-	${log}::debug "Creating dummy key in $section section"
-	ini::set $fcon $section junk junky
-	set mustclean 1
-    } else {
-	set mustclean 0
-    }
-    ini::comment $fcon $section "" $comment
-    if {$mustclean} {
-	${log}::debug "Deleting dummy key"
-	ini::delete $fcon $section junk
-    }
-    ini::commit $fcon
-    ini::close $fcon
-}
 	
 if {[file exists $configfile] == 0} {
     # The config file does not exist
@@ -172,6 +135,9 @@ if {[file exists $configfile] == 0} {
 
 
 # ------------------------ Hex code entry -----------------------------
+# Source the hex.validate function
+source number.tcl
+
 ttk::labelframe .entry_frme -text "Hex code"\
     -labelanchor n\
     -borderwidth 1\
@@ -182,31 +148,9 @@ ttk::label .entry_frme.0x_labl -text "0x"\
 ttk::entry .entry_frme.hex_enty\
     -textvariable hexnum\
     -validate key\
-    -validatecommand {hexvalidate 0x%P}\
+    -validatecommand {hex.validate %P 16}\
     -width 4 \
     -font FixedFont
-
-proc hexvalidate {hexnum} {
-    global log
-    ${log}::debug "Checking input $hexnum"
-    if {[string compare $hexnum "0x{}"] == 0} {
-	# The input string is empty -- this is ok
-	bitcalc 0
-	return 1
-    }
-    if {[string is integer $hexnum] != 1} {
-	# The input string is not a number -- not ok
-	return 0
-    }
-    if {[expr $hexnum <= 0xffff]} {
-	${log}::debug "Entry is ok"
-	bitcalc $hexnum
-	return 1
-    } else {
-	${log}::debug "Entry is not ok"
-	return 0
-    }	
-}
 
 proc hexcalc {} {
     # Calcuate hex input based on check button states
@@ -226,21 +170,7 @@ proc hexcalc {} {
     set hexnum [format %0x $sum]
 }
 
-# ---------------------- Set up pull-down menu ------------------------
-menu .menubar
-menu .menubar.help -tearoff 0
-.menubar add cascade -label Help -menu .menubar.help -underline 0
-. configure -menu .menubar -width 200 -height 150
-.menubar.help add command -label {About bitdecode...} \
-    -underline 0 -command showAbout
 
-
-wm geometry . [dict get $rootwinparams width]x[dict get $rootwinparams height]
-
-# Create window icon
-set wmiconfile ./icons/calc_16x16.png
-set wmicon [image create photo -format png -file $wmiconfile]
-wm iconphoto . $wmicon
 
 # ----------------------- Check buttons for bits ----------------------
 
@@ -309,9 +239,14 @@ proc bitcalc {hexnum} {
 #------------------------- Pack widgets -------------------------------
 # Remember that order matters when packing
 
-pack .console_frme -side bottom
+
+# The main window log box
+pack .console_frme -side bottom\
+    -padx 10 \
+    -pady 10
 pack .console_scrl -fill y -side right -in .console_frme
-pack .console_text -fill x -side bottom -expand 1 -in .console_frme
+pack .console_text -fill x -side bottom\
+    -in .console_frme
 
 # The bit array master frame
 pack .bitarray_frme -expand 1\
@@ -321,45 +256,44 @@ pack .bitarray_frme -expand 1\
 
 # The byte1 frame
 pack .byte1_frme -side left\
-    -expand 1\
-    -ipadx 100\
     -padx 5\
     -pady 5\
     -in .bitarray_frme
 for {set bitnum 0} {$bitnum<8} {incr bitnum} {
-    pack .byte1_bit${bitnum}_cbut -in .byte1_frme -anchor w
+    pack .byte1_bit${bitnum}_cbut -in .byte1_frme \
+	-anchor w \
+	-padx 5 \
+	-pady 5
 }
 
 # The byte2 frame
 pack .byte2_frme -side right\
-    -expand 1\
-    -ipadx 100\
     -padx 5\
     -pady 5\
     -in .bitarray_frme
 for {set bitnum 0} {$bitnum<8} {incr bitnum} {
-    pack .byte2_bit${bitnum}_cbut -in .byte2_frme -anchor w
+    pack .byte2_bit${bitnum}_cbut -in .byte2_frme \
+	-anchor w \
+	-padx 5 \
+	-pady 5
 }
 
-pack .entry_frme -padx 5 -pady 5; # Hex word entry frame
-pack .entry_frme.hex_enty -side right\
-    -padx {0 100}\
+# The hex entry frame
+pack .entry_frme -side top\
+    -padx 5 \
     -pady 5
-pack .entry_frme.0x_labl -side left\
-    -padx {100 0}
+pack .entry_frme.hex_enty -side right \
+    -padx {0 5} \
+    -pady 5
+pack .entry_frme.0x_labl -side left \
+    -padx {5 0}
 
 
 
 
 
 
-#  Define a procedure - an action for Help-About
-proc showAbout {} {
-    global log
-    global revcode
-    tk_messageBox -message "bitdecode\nVersion $revcode" \
-	-title {About bitdecode}
-}
+
 
 #--------------------------- Initialize -------------------------------
 

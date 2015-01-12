@@ -8,7 +8,7 @@ ttk::labelframe .console_frme -text "Execution log"\
 text .console_text -yscrollcommand {.console_scrl set} \
     -width 100 \
     -height 10 \
-    -font LogFont
+    -font LogFont 
 # Use yview for a vertical scrollbar -- scrolls in the y direction
 # based on input
 scrollbar .console_scrl -orient vertical -command {.console_text yview}

@@ -3,11 +3,14 @@
 # The name of the program or executable -- no extensions
 MAINFILE = bitdecode
 
-# The version code
-REVCODE = 1.1
+# The version code.  This is where the code should be set.  This value
+# will be written to the source files and show up
+REVCODE := 1.1
 
 # Other supporting files (with extensions)
-SRC = loggerconf.tcl
+SRC = loggerconf.tcl \
+      config.tcl \
+      number.tcl
 
 # Directory for icons
 ICONSDIR = icons
@@ -17,9 +20,12 @@ ICONS = calc_16x16.png
 
 
 
-# The runtime engines to package in the starpack.  These, of course,
-# have to run on the machines you're targeting.
-W32KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"
+# The tclkits to package in the starpacks.
+#
+# For windows:
+#   www.patthoyts.tk/tclkit/win32-ix86
+# W32KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"
+W32KIT = "/cygdrive/c/Tcl/bin/tclkit-gui-862.exe"
 W64KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-x86_64.exe"
 
 # The tcl shell needed to execute the Starkit Developer tools.  I
@@ -124,7 +130,8 @@ $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl: $(MAINFILE).vfs \
                                                      $(MAINFILE).vfs/lib
 	sed 's,[[:graph:]]*\.tcl,$(SOURCESTR),g' < $(MAINFILE).tcl |\
 	  sed 's,[^/]*\.png,$(ICONSTR),g' |\
-          sed 's,\./icons/,,g' > $@
+          sed 's,\./icons/,,g' |\
+          sed 's/set revcode.*/set revcode $(REVCODE)/g'> $@
 
 
 # The starpack is the same as a starkit with a built-in tclkit.  The
