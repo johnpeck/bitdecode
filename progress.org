@@ -22,7 +22,7 @@
    - http://teapot.activestate.com/index
 * ----------------------------- TODO list -----------------------------
 * Work on executables
-** TODO Version number from makefile must be written to tcl
+** DONE Version number from makefile must be written to tcl
    - The question:
      http://stackoverflow.com/questions/8822097/how-to-replace-the-whole-line-with-sed
      addresses how to replace an entire line starting with something.

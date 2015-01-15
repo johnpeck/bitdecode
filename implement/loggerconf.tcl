@@ -76,7 +76,9 @@ proc log_manager {lvl txt} {
 	    {insert linestart -1 lines +2 chars} \
 	    {insert linestart -1 lines +7 chars}
     	.console_text tag configure errortag -foreground red
-    } 
+    }
+    # Scroll to the end
+    .console_text see end
 }
 
 # Define the callback function for the logger for each log level
