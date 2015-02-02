@@ -4,8 +4,10 @@
 MAINFILE = bitdecode
 
 # The version code.  This is where the code should be set.  This value
-# will be written to the source files and show up
-REVCODE := 1.1
+# will be written to the source files and show up in the filename.
+# I'll use semantic versioning, so that each version should have
+# major, minor, and patch codes.
+REVCODE := 1.1.0
 
 # Other supporting files (with extensions)
 SRC = loggerconf.tcl \
@@ -23,11 +25,11 @@ ICONS = calc_16x16.png
 # The tclkits to package in the starpacks.
 #
 # For windows:
-#   www.patthoyts.tk/tclkit/win32-ix86
 #   http://tclkits.rkeene.org/fossil/wiki/Downloads
 #   
 # W32KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"
-W32KIT = "/cygdrive/c/Tcl/bin/tclkit-gui-862.exe"
+# W32KIT = "/cygdrive/c/Tcl/bin/tclkit-gui-862.exe"
+W32KIT = "/cygdrive/c/Tcl/bin/tclkit-gui-8.6.2-twapi-4.0.61-win32-ix86.exe"
 # W64KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-x86_64.exe"
 W64KIT = "/cygdrive/c/Tcl/bin/tclkit-gui-8.6.2-twapi-4.0.61-win32-x86_64.exe"
 
@@ -138,17 +140,19 @@ $(MAINFILE).vfs/lib/app-$(MAINFILE)/$(MAINFILE).tcl: $(MAINFILE).vfs \
 
 
 # The starpack is the same as a starkit with a built-in tclkit.  The
-# wrap command is the only difference.
+# wrap command is the only difference.  Naming convention for these
+# starpacks comes from tclkits at:
+# http://tclkits.rkeene.org/fossil/wiki/Downloads
 .PHONY: win32
-win32: starpacks/$(REVCODE)/win32/$(MAINFILE).exe
-starpacks/$(REVCODE)/win32/$(MAINFILE).exe: starkit
+win32: starpacks/$(MAINFILE)-$(REVCODE)-win32-ix86.exe
+starpacks/$(MAINFILE)-$(REVCODE)-win32-ix86.exe: starkit
 	mkdir -p $(dir $@)
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(W32KITNP)
 	mv $(MAINFILE) $@
 
 .PHONY: win64
 win64: starpacks/$(REVCODE)/win64/$(MAINFILE).exe
-starpacks/$(REVCODE)/win64/$(MAINFILE).exe: starkit
+starpacks/$(MAINFILE)-$(REVCODE)-win32-x86_64.exe: starkit
 	mkdir -p $(dir $@)
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(W64KITNP)
 	mv $(MAINFILE) $@

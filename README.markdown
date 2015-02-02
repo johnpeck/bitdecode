@@ -10,11 +10,13 @@ Tcl, Tk, or any dependencies.  Further, running the Starpack will
 leave no installation-related files behind.  You can uninstall the
 program by deleting the Starpack.
 
+Find release binaries by clicking on the **releases** button:
+![Alt text](./screenshots/release_button "Release button")
+
+
 ### 32-bit (and 64-bit) Windows ###
 
-Find the self-contained Starpack in the subdirectory of its version
-number.  For example, the 1.1 version's Starpack is
-[here](implement/starpacks/1.1/win32/bitdecode.exe).
+
 
 
 
