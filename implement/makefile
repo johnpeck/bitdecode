@@ -24,9 +24,12 @@ ICONS = calc_16x16.png
 #
 # For windows:
 #   www.patthoyts.tk/tclkit/win32-ix86
+#   http://tclkits.rkeene.org/fossil/wiki/Downloads
+#   
 # W32KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-ix86.exe"
 W32KIT = "/cygdrive/c/Tcl/bin/tclkit-gui-862.exe"
-W64KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-x86_64.exe"
+# W64KIT = "/cygdrive/c/Tcl/bin/base-tk8.6-thread-win32-x86_64.exe"
+W64KIT = "/cygdrive/c/Tcl/bin/tclkit-gui-8.6.2-twapi-4.0.61-win32-x86_64.exe"
 
 # The tcl shell needed to execute the Starkit Developer tools.  I
 # install the Tcl tools directly from ActiveState
@@ -145,7 +148,7 @@ starpacks/$(REVCODE)/win32/$(MAINFILE).exe: starkit
 
 .PHONY: win64
 win64: starpacks/$(REVCODE)/win64/$(MAINFILE).exe
-starpacks/$(MAINFILE)_win64.exe: starkit
+starpacks/$(REVCODE)/win64/$(MAINFILE).exe: starkit
 	mkdir -p $(dir $@)
 	$(TCLKITSH) $(SDXNP) wrap $(MAINFILE) -runtime $(W64KITNP)
 	mv $(MAINFILE) $@
