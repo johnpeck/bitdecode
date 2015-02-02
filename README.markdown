@@ -13,6 +13,9 @@ program by deleting the Starpack.
 Find release binaries by clicking on the **releases** button:
 ![Alt text](./screenshots/release_button.png "Release button")
 
+The executable Starpacks are also included in the zipped-up source
+releases in the `implement/starpacks/` directory.
+
 
 ### 32-bit (and 64-bit) Windows ###
 
