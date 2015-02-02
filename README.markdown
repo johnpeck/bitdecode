@@ -11,7 +11,7 @@ leave no installation-related files behind.  You can uninstall the
 program by deleting the Starpack.
 
 Find release binaries by clicking on the **releases** button:
-![Alt text](./screenshots/release_button "Release button")
+![Alt text](./screenshots/release_button.png "Release button")
 
 
 ### 32-bit (and 64-bit) Windows ###
